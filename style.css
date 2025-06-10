@@ -1,0 +1,105 @@
+body {
+    background-color: #f4f6f9;
+}
+
+.header-section {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+#drop-zone {
+    border: 2px dashed #d1d3e2;
+    border-radius: 8px;
+    padding: 3rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #fff;
+}
+#drop-zone:hover, #drop-zone.drag-over {
+    border-color: #4e73df;
+    background: #f8f9fc;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.stats-card {
+    background: linear-gradient(45deg, #1cc88a, #13855c);
+    color: white;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.table-container {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.btn-export {
+    background: #5a5c69;
+    border: none;
+    color: white;
+}
+.btn-export:hover {
+    background: #484950;
+    color: white;
+}
+
+.history-item {
+    border-left: 3px solid #4e73df;
+    padding-left: 15px;
+}
+
+/* Dark mode */
+.dark-mode {
+    background-color: #1a1d29;
+    color: #fff;
+}
+.dark-mode .card {
+    background-color: #2d3748;
+    color: #fff;
+}
+.dark-mode #drop-zone {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #fff;
+}
+
+.loading-spinner::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #4e73df;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.trend-up { color: #1cc88a; }
+.trend-down { color: #e74a3b; }
+
+/* ===== FIX: HIỂN THỊ RÕ CHỮ TRONG FOOTER ===== */
+/* Đoạn code được thêm vào để sửa lỗi chữ bị mờ, khó thấy trên nền tối */
+footer.bg-dark .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important; /* Làm cho màu chữ sáng hơn */
+}
+
+footer.bg-dark a.text-muted:hover {
+    color: rgba(255, 255, 255, 1) !important; /* Sáng trắng lên khi di chuột vào */
+}
+/* ============================================== */

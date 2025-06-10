@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Thống Kê Mệnh Giá</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h2 mb-1">Dashboard Thống Kê Mệnh Giá</h1>
+                    <p class="mb-0">Phân tích dữ liệu từ file TXT, CSV, Excel</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-light me-2" onclick="toggleDarkMode()">
+                        <i class="bi bi-moon"></i> Dark Mode
+                    </button>
+                    <button class="btn btn-light" onclick="clearAll()">
+                        <i class="bi bi-trash"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-cloud-upload me-2"></i>Tải File Dữ Liệu
+            </div>
+            <div class="card-body">
+                <div id="drop-zone" class="text-center">
+                    <i class="bi bi-file-earmark-arrow-up display-4 text-muted mb-3"></i>
+                    <h5>Kéo thả file hoặc click để chọn</h5>
+                    <p class="text-muted">Hỗ trợ: TXT, CSV, XLS, XLSX (max 10MB)</p>
+                    <input type="file" id="file-input" class="d-none" accept=".txt,.csv,.xls,.xlsx">
+                </div>
+                <div id="upload-progress" class="mt-3 d-none">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="status-msg" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div id="results-section" class="d-none">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="card stats-card text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">Tổng Giá Trị</div>
+                                    <div id="total-value" class="h4 mb-0">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-currency-dollar display-4"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="card border-left-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Số Mục</div>
+                                    <div id="total-items" class="h4 mb-0">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-list-ol display-4 text-info"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="card border-left-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Trung Bình</div>
+                                    <div id="avg-value" class="h4 mb-0">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-calculator display-4 text-warning"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-bar-chart me-2"></i>Biểu Đồ Phân Bố</span>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="changeChartType('bar')">Bar</button>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="changeChartType('pie')">Pie</button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="changeChartType('line')">Line</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="main-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="bi bi-clock-history me-2"></i>Lịch Sử Xử Lý
+                        </div>
+                        <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                            <div id="history-container">
+                                <p class="text-muted text-center">Chưa có dữ liệu...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-info-circle me-2"></i>Thống Kê Nhanh
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="border-end">
+                                        <div class="h6 text-primary" id="max-denomination">0</div>
+                                        <div class="small text-muted">Cao nhất</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h6 text-danger" id="min-denomination">0</div>
+                                    <div class="small text-muted">Thấp nhất</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-table me-2"></i>Chi Tiết Dữ Liệu</span>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Tìm kiếm..." style="width: 200px;">
+                        <button class="btn btn-export btn-sm" onclick="exportData()">
+                            <i class="bi bi-download me-1"></i>Export CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th onclick="sortTable(0)">Mệnh Giá <i class="bi bi-arrow-down-up"></i></th>
+                                    <th onclick="sortTable(1)">Số Lần <i class="bi bi-arrow-down-up"></i></th>
+                                    <th onclick="sortTable(2)">Tổng <i class="bi bi-arrow-down-up"></i></th>
+                                    <th>% Tổng</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="mb-3">Dashboard Analytics</h5>
+                    <p class="small text-muted">Công cụ phân tích dữ liệu mệnh giá chuyên nghiệp, hỗ trợ nhiều định dạng file và xuất báo cáo chi tiết.</p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="text-light"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-github"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="mb-3">Tính Năng</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="#" class="text-muted text-decoration-none">Phân tích CSV</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Xuất Excel</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Biểu đồ</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Thống kê</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="mb-3">Hỗ Trợ</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="#" class="text-muted text-decoration-none">Hướng dẫn</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">FAQ</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Liên hệ</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Báo lỗi</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="mb-3">Chính Sách</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="#" class="text-muted text-decoration-none">Điều khoản</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Bảo mật</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Cookie</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">GDPR</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6 class="mb-3">Liên Hệ</h6>
+                    <div class="small text-muted">
+                        <p class="mb-2"><i class="bi bi-geo-alt me-2"></i>Hà Nội, Việt Nam</p>
+                        <p class="mb-2"><i class="bi bi-envelope me-2"></i>support@dashboard.vn</p>
+                        <p class="mb-2"><i class="bi bi-phone me-2"></i>+84 123 456 789</p>
+                        <p class="mb-0"><i class="bi bi-clock me-2"></i>24/7 Online</p>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <p class="small text-muted mb-0">
+                        © 2025 Dashboard Analytics. Tất cả các quyền được bảo lưu. | 
+                        <a href="#" class="text-muted">Chính sách bảo mật</a> | 
+                        <a href="#" class="text-muted">Điều khoản sử dụng</a>
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-flex justify-content-md-end gap-3">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzAwNTFBNSIvPjx0ZXh0IHg9IjIwIiB5PSIxNSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VklTQTwvdGV4dD48L3N2Zz4=" alt="Visa" class="opacity-75">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iI0VCMDAxQiIvPjx0ZXh0IHg9IjIwIiB5PSIxNSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NYXN0ZXJDYXJkPC90ZXh0Pjwvc3ZnPg==" alt="MasterCard" class="opacity-75">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzAwMzA4NyIvPjx0ZXh0IHg9IjIwIiB5PSIxNSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGF5UGFsPC90ZXh0Pjwvc3ZnPg==" alt="PayPal" class="opacity-75">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <div class="small text-muted">
+                        <span class="me-3">🔒 Bảo mật SSL</span>
+                        <span class="me-3">⚡ Tốc độ cao</span>
+                        <span class="me-3">📊 Phân tích chính xác</span>
+                        <span>🌍 Hỗ trợ đa ngôn ngữ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>
